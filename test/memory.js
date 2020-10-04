@@ -1,5 +1,5 @@
 /**
- *  test/initialize.js
+ *  test/memory.js
  *
  *  David Janes
  *  IOTDB
@@ -29,23 +29,23 @@ const assert = require("assert")
 const cache = require("..")
 const _util = require("./_util")
 
-describe("initialize", function() {
+describe("memory", function() {
     let self = {}
 
     before(function(done) {
         _.promise(self)
-            .then(_util.initialize)
-            .then(_util.load)
+            .add("cache$cfg", {})
+            .then(cache.memory.initialize)
             .make(sd => {
                 self = sd
             })
-            .end(done)
+            .end(done, {})
     })
 
     describe("good", function() {
         it("works", function(done) {
             _.promise(self)
-                .end(done)
+                .end(done, {})
         })
     })
 })
