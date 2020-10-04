@@ -69,4 +69,34 @@ describe("memory", function() {
                 .end(done, {})
         })
     })
+    describe("memory.get", function() {
+        it("memory.put - works", function(done) {
+            _.promise(self)
+                .then(cache.memory.initialize)
+
+                .make(sd => {
+                    sd.key = "key-1"
+                    sd.value = {
+                        "tokens": [ "a", "b", "c" ]
+                    }
+                })
+                .then(cache.memory.put)
+                .make(sd => {
+                    delete sd.value
+                })
+                .then(cache.memory.get)
+                .then(sd => {
+                    assert.ok(sd.exists === true)
+
+                    const want = {
+                        "tokens": [ "a", "b", "c" ],
+                    }
+                    const got = sd.value
+
+                    assert.deepEqual(got, want)
+                })
+
+                .end(done, {})
+        })
+    })
 })
