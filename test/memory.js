@@ -50,7 +50,7 @@ describe("memory", function() {
 
                 .make(sd => {
                     sd.key = "key-1"
-                    sd.value = {
+                    sd.json = {
                         "tokens": [ "a", "b", "c" ]
                     }
                 })
@@ -76,22 +76,20 @@ describe("memory", function() {
 
                 .make(sd => {
                     sd.key = "key-1"
-                    sd.value = {
+                    sd.json = {
                         "tokens": [ "a", "b", "c" ]
                     }
                 })
                 .then(cache.memory.put)
                 .make(sd => {
-                    delete sd.value
+                    delete sd.json
                 })
                 .then(cache.memory.get)
                 .then(sd => {
-                    assert.ok(sd.exists === true)
-
                     const want = {
                         "tokens": [ "a", "b", "c" ],
                     }
-                    const got = sd.value
+                    const got = sd.json
 
                     assert.deepEqual(got, want)
                 })
