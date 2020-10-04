@@ -30,26 +30,24 @@ const cache = require("..")
 const _util = require("./_util")
 
 describe("memory", function() {
-    let self = {}
+    const self = {
+        cache$cfg: {},
+    }
 
-    before(function(done) {
-        _.promise(self)
-            .add("cache$cfg", {})
-            .then(cache.memory.initialize)
-            .make(sd => {
-                self = sd
-            })
-            .end(done, {})
-    })
-
-    describe("good", function() {
-        it("memory.initialize", function(done) {
+    describe("memory.initialize", function() {
+        it("memory.initialize - works", function(done) {
             _.promise(self)
+                .then(cache.memory.initialize)
+
                 .end(done, {})
         })
+    })
 
-        it("memory.put", function(done) {
+    describe("memory.put", function() {
+        it("memory.put - works", function(done) {
             _.promise(self)
+                .then(cache.memory.initialize)
+
                 .make(sd => {
                     sd.tokens = [ "a", "b", "c" ]
                     sd.rule = {
@@ -58,8 +56,47 @@ describe("memory", function() {
                     }
                 })
                 .then(cache.memory.put)
+                .make(sd => {
+                    const want = {
+                        "key-1": {
+                            "tokens": [ "a", "b", "c" ],
+                        },
+                    }
+                    const got = sd.cache.memory
+
+                    assert.deepEqual(got, want)
+                })
 
                 .end(done, {})
+        })
+        it("memory.put - expected fail for missing self.value", function(done) {
+            _.promise(self)
+                .then(cache.memory.initialize)
+
+                .make(sd => {
+                    sd.rule = {
+                        key: "key-1",
+                        values: "xxx",
+                    }
+                })
+                .then(cache.memory.put)
+                .then(_util.auto_fail(done))
+                .catch(_util.ok_error(done))
+        })
+        it("memory.put - expected fail for non-JSON value", function(done) {
+            _.promise(self)
+                .then(cache.memory.initialize)
+
+                .make(sd => {
+                    sd.f = () => {},
+                    sd.rule = {
+                        key: "key-1",
+                        values: "f",
+                    }
+                })
+                .then(cache.memory.put)
+                .then(_util.auto_fail(done))
+                .catch(_util.ok_error(done))
         })
     })
 })
