@@ -49,10 +49,9 @@ describe("memory", function() {
                 .then(cache.memory.initialize)
 
                 .make(sd => {
-                    sd.tokens = [ "a", "b", "c" ]
-                    sd.rule = {
-                        key: "key-1",
-                        values: "tokens",
+                    sd.key = "key-1"
+                    sd.value = {
+                        "tokens": [ "a", "b", "c" ]
                     }
                 })
                 .then(cache.memory.put)
@@ -68,35 +67,6 @@ describe("memory", function() {
                 })
 
                 .end(done, {})
-        })
-        it("memory.put - expected fail for missing self.value", function(done) {
-            _.promise(self)
-                .then(cache.memory.initialize)
-
-                .make(sd => {
-                    sd.rule = {
-                        key: "key-1",
-                        values: "xxx",
-                    }
-                })
-                .then(cache.memory.put)
-                .then(_util.auto_fail(done))
-                .catch(_util.ok_error(done))
-        })
-        it("memory.put - expected fail for non-JSON value", function(done) {
-            _.promise(self)
-                .then(cache.memory.initialize)
-
-                .make(sd => {
-                    sd.f = () => {},
-                    sd.rule = {
-                        key: "key-1",
-                        values: "f",
-                    }
-                })
-                .then(cache.memory.put)
-                .then(_util.auto_fail(done))
-                .catch(_util.ok_error(done))
         })
     })
 })
