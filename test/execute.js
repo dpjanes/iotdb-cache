@@ -23,79 +23,159 @@
 "use strict"
 
 const _ = require("iotdb-helpers")
+const fs = require("iotdb-fs")
 
 const assert = require("assert")
 
 const cache = require("..")
 const _util = require("./_util")
 
-describe("memory", function() {
-    const self = {
-        cache$cfg: {},
-    }
+describe("execute", function() {
+    describe("memory", function() {
+        const self = {
+            cache$cfg: {},
+        }
 
-    
-    let _called = false
-    const _make_tokens = _.promise(self => {
-        self.tokens = [ "a", "b", "c" ]
-        _called = true
+        let _called = false
+        const _make_tokens = _.promise(self => {
+            self.tokens = [ "a", "b", "c" ]
+            _called = true
+        })
+
+        it("execute - passes through values", function(done) {
+            _.promise(self)
+                .then(cache.memory.initialize)
+                .make(sd => {
+                    sd.rule = {
+                        key: "key-1",
+                        values: "tokens",
+                        method: _make_tokens,
+                    }
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
+
+                    assert.deepEqual(got, want)
+                    assert.ok(_called)
+                })
+
+                .end(done, {})
+        })
+        it("execute - actually caches", function(done) {
+            _.promise(self)
+                .then(cache.memory.initialize)
+                .make(sd => {
+                    sd.rule = {
+                        key: "key-1",
+                        values: "tokens",
+                        method: _make_tokens,
+                    }
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
+
+                    assert.deepEqual(got, want)
+                    assert.ok(_called)
+                })
+
+                // second time
+                .make(sd => {
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
+
+                    assert.deepEqual(got, want)
+                    assert.ok(!_called)
+                })
+
+                .end(done, {})
+        })
     })
+    describe("fs", function() {
+        const self = {
+            cache$cfg: {
+                path: ".fs-cache",
+            },
+        }
 
-    it("execute - passes through values", function(done) {
-        _.promise(self)
-            .then(cache.memory.initialize)
-            .make(sd => {
-                sd.rule = {
-                    key: "key-1",
-                    values: "tokens",
-                    method: _make_tokens,
-                }
-                _called = false
-            })
-            .then(cache.execute)
-            .make(sd => {
-                const want = [ "a", "b", "c" ]
-                const got = sd.tokens
+        beforeEach(function(done) {
+            _.promise(self)
+                .add("cache$cfg/path")
+                .then(fs.remove.recursive)
+                .end(done, {})
+        })
 
-                assert.deepEqual(got, want)
-                assert.ok(_called)
-            })
+        let _called = false
+        const _make_tokens = _.promise(self => {
+            self.tokens = [ "a", "b", "c" ]
+            _called = true
+        })
 
-            .end(done, {})
-    })
-    it("execute - actually caches", function(done) {
-        _.promise(self)
-            .then(cache.memory.initialize)
-            .make(sd => {
-                sd.rule = {
-                    key: "key-1",
-                    values: "tokens",
-                    method: _make_tokens,
-                }
-                _called = false
-            })
-            .then(cache.execute)
-            .make(sd => {
-                const want = [ "a", "b", "c" ]
-                const got = sd.tokens
+        it("execute - passes through values", function(done) {
+            _.promise(self)
+                .then(fs.cache)
+                .make(sd => {
+                    sd.rule = {
+                        key: "key-1",
+                        values: "tokens",
+                        method: _make_tokens,
+                    }
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
 
-                assert.deepEqual(got, want)
-                assert.ok(_called)
-            })
+                    assert.deepEqual(got, want)
+                    assert.ok(_called)
+                })
 
-            // second time
-            .make(sd => {
-                _called = false
-            })
-            .then(cache.execute)
-            .make(sd => {
-                const want = [ "a", "b", "c" ]
-                const got = sd.tokens
+                .end(done, {})
+        })
+        it("execute - actually caches", function(done) {
+            _.promise(self)
+                .then(fs.cache)
+                .make(sd => {
+                    sd.rule = {
+                        key: "key-1",
+                        values: "tokens",
+                        method: _make_tokens,
+                    }
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
 
-                assert.deepEqual(got, want)
-                assert.ok(!_called)
-            })
+                    assert.deepEqual(got, want)
+                    assert.ok(_called)
+                })
 
-            .end(done, {})
+                // second time
+                .make(sd => {
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
+
+                    assert.deepEqual(got, want)
+                    assert.ok(!_called)
+                })
+
+                .end(done, {})
+        })
     })
 })
