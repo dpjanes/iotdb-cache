@@ -43,8 +43,22 @@ describe("memory", function() {
     })
 
     describe("good", function() {
-        it("works", function(done) {
+        it("memory.initialize", function(done) {
             _.promise(self)
+                .end(done, {})
+        })
+
+        it("memory.put", function(done) {
+            _.promise(self)
+                .make(sd => {
+                    sd.tokens = [ "a", "b", "c" ]
+                    sd.rule = {
+                        key: "key-1",
+                        values: "tokens",
+                    }
+                })
+                .then(cache.memory.put)
+
                 .end(done, {})
         })
     })
