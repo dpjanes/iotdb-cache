@@ -178,4 +178,74 @@ describe("execute", function() {
                 .end(done, {})
         })
     })
+    describe("null", function() {
+        const self = {
+            cache$cfg: {
+            },
+        }
+
+        let _called = false
+        const _make_tokens = _.promise(self => {
+            self.tokens = [ "a", "b", "c" ]
+            _called = true
+        })
+
+        it("execute - passes through values", function(done) {
+            _.promise(self)
+                .then(cache.null.initialize)
+                .make(sd => {
+                    sd.rule = {
+                        key: "key-1",
+                        values: "tokens",
+                        method: _make_tokens,
+                    }
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
+
+                    assert.deepEqual(got, want)
+                    assert.ok(_called)
+                })
+
+                .end(done, {})
+        })
+        it("execute - actually caches", function(done) {
+            _.promise(self)
+                .then(cache.null.initialize)
+                .make(sd => {
+                    sd.rule = {
+                        key: "key-1",
+                        values: "tokens",
+                        method: _make_tokens,
+                    }
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
+
+                    assert.deepEqual(got, want)
+                    assert.ok(_called)
+                })
+
+                // second time
+                .make(sd => {
+                    _called = false
+                })
+                .then(cache.execute)
+                .make(sd => {
+                    const want = [ "a", "b", "c" ]
+                    const got = sd.tokens
+
+                    assert.deepEqual(got, want)
+                    assert.ok(_called) // note it will be called because there is no cache
+                })
+
+                .end(done, {})
+        })
+    })
 })
