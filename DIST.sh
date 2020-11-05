@@ -6,7 +6,6 @@
 #   2020-10-03
 #
 
-exit 0
 PACKAGE=iotdb-cache
 DIST_ROOT=/var/tmp/.dist.$$
 
@@ -37,6 +36,7 @@ echo "=================="
         README.md LICENSE \
         package.json \
         index.js \
+        logger.js \
         lib/*.js \
         |
     ( cd "${NPM_DST}" && tar xvf - && npm publish ) || exit 1

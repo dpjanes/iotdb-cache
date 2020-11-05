@@ -43,7 +43,7 @@ Cached result will be stored in files
             path: path.join(os.homedir(), ".fs-cache"),
         },
     })
-        .then(cache.memory.initialize)
+        .then(fs.cache)
         .make(sd => {
             sd.rule = {
                 key: "key-1",
@@ -63,7 +63,7 @@ This will do nothing
     _.promise({
         cache$cfg: {},
     })
-        .then(cache.memory.initialize)
+        .then(cache.null.initialize)
         .make(sd => {
             sd.rule = {
                 key: "key-1",       // usually a computed function, based on inputs
